@@ -28,13 +28,5 @@ const HomePage: NextPage = () => {
   );
 };
 
-export const getServerSideProps = async () => {
-  await db.connect()
-  return {
-      props: {
-      
-      },
-    };
-}
 
 export default HomePage;

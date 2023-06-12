@@ -23,7 +23,7 @@ import {
 import { isValidObjectId } from "mongoose";
 import { GetServerSideProps } from "next";
 import { useRouter } from "next/router";
-import { ChangeEvent, FC, useContext, useMemo, useState } from "react";
+import { ChangeEvent, FC, useContext, useEffect, useMemo, useState } from "react";
 import { entriesApi } from "../../apis";
 import { Layout } from "../../components/layouts";
 import { EntriesContext } from "../../context/entries";
@@ -36,17 +36,38 @@ import { getFormatDistanceToNow } from "../../utils";
 
  const validStatus: EntryStatus[] = ["pending",  "finished"];
 
-interface Props {
-  entry: Entry;
-}
 
-export const EntryPage: FC<Props> = ({ entry }) => {
+
+export const EntryPage: FC = () => {
   const router = useRouter();
   const { updateEntry, deleteEntry } = useContext(EntriesContext);
+  const [entry, setEntry] = useState<Entry>()
 
-  const [inputValue, setInputValue] = useState(entry.description);
-  const [status, setStatus] = useState<EntryStatus>(entry.status);
+  const [inputValue, setInputValue] = useState(entry?.description);
+  const [status, setStatus] = useState<EntryStatus>(entry?.status??'finished');
   const [touched, setTouched] = useState(false);
+
+  const { id } = router.query
+
+  useEffect(() => {
+  if(!entry?._id) {
+    fetch('/api/entries/' + id)
+    .then(result => result.json())
+    .catch(() => window.location.href = '/')
+    .then(data => {
+      setEntry(data) 
+      setInputValue(data.description)
+      setStatus(data.status)
+    })
+  }
+  }, [entry])
+
+  
+  const isValid = useMemo(() => inputValue && inputValue.length > 0, [inputValue]);
+
+  const hasError = useMemo(() => !isValid && touched, [isValid, touched]);
+
+  if(!entry?._id) return <>cargando...</>
 
   const onTextFieldChanged = (event: ChangeEvent<HTMLInputElement>) => {
     setInputValue(event.target.value);
@@ -65,10 +86,6 @@ export const EntryPage: FC<Props> = ({ entry }) => {
     await deleteEntry(entry._id);
     router.push("/");
   };
-
-  const isValid = useMemo(() => inputValue.length > 0, [inputValue]);
-
-  const hasError = useMemo(() => !isValid && touched, [isValid, touched]);
 
   return (
     <Layout title={inputValue}>
@@ -138,35 +155,6 @@ export const EntryPage: FC<Props> = ({ entry }) => {
       </Grid>
     </Layout>
   );
-};
-
-export const getServerSideProps: GetServerSideProps = async ({ params }) => {
-  let entry = undefined;
-
-  if (params && params.id && isValidObjectId(params.id)) {
-    await db.connect();
-    entry = await EntryModel.findById(params.id);
-    await db.disconnect();
-  }
-
-  if (!entry) {
-    return {
-      redirect: {
-        destination: "/",
-        permanent: false,
-      },
-    };
-  }
-  return {
-    props: {
-      entry: {
-        _id: params?.id,
-        status: entry.status,
-        description: entry.description,
-        createdAt: entry.createdAt,
-      },
-    },
-  };
 };
 
 export default EntryPage;
