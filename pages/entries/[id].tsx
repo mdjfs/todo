@@ -144,9 +144,9 @@ export const getServerSideProps: GetServerSideProps = async ({ params }) => {
   let entry = undefined;
 
   if (params && params.id && isValidObjectId(params.id)) {
-    db.connect();
+    await db.connect();
     entry = await EntryModel.findById(params.id);
-    db.disconnect();
+    await db.disconnect();
   }
 
   if (!entry) {

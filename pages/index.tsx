@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, Grid, Typography } from "@mui/material";
 import type { NextPage } from "next";
 import { Layout } from "../components/layouts";
 import { EntryList, NewEntry } from "../components/ui";
+import { db } from "../database";
 
 const HomePage: NextPage = () => {
   return (
@@ -26,5 +27,14 @@ const HomePage: NextPage = () => {
     </Layout>
   );
 };
+
+export const getServerSideProps = async () => {
+  await db.connect()
+  return {
+      props: {
+      
+      },
+    };
+}
 
 export default HomePage;
