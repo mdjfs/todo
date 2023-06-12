@@ -43,26 +43,31 @@ export const EntryList: FC<Props> = ({ status }) => {
             } else {
               console.log(' se envia ')
               const sendPending = async () => {
-                await refreshEntries()
-                 const now = new Date(). getTime();
-                const futureDate = new Date('17 Jun 2023 18:00:00'). getTime();
-                const timeleft = futureDate - now;
-                const days = Math. floor( timeleft / (1000 * 60 * 60 * 24));
-                const pendings = [
-                  'Quedan ' + days + ' días para ir a Itati\n',
-                  'Pendientes para el viaje: ' + entries.map(entry => entry.description).join(', '),
-                ]
-                reg.showNotification(
-                  'Pendientes',
-                  {
-                    tag: 'pendiente-' + new Date().toString(), // a unique ID
-                    body: pendings.join('\n'), // content of the push notification
-                    data: {
-                      url: window.location.href, // pass the current url to the notification
-                    },
-                    vibrate: [200, 100, 200, 100, 200, 100, 200]
+                const newEntries = await refreshEntries()
+                if(newEntries) {
+                  const pendingEntries = newEntries.filter(entry => entry.status === 'pending')
+                  if(pendingEntries.length > 0) {
+                    const now = new Date(). getTime();
+                    const futureDate = new Date('17 Jun 2023 18:00:00'). getTime();
+                    const timeleft = futureDate - now;
+                    const days = Math. floor( timeleft / (1000 * 60 * 60 * 24));
+                    const pendings = [
+                      'Quedan ' + days + ' días para ir a Itati\n',
+                      'Pendientes para el viaje: ' + entries.map(entry => entry.description).join(', '),
+                    ]
+                    reg.showNotification(
+                      'Pendientes',
+                      {
+                        tag: 'pendiente-' + new Date().toString(), // a unique ID
+                        body: pendings.join('\n'), // content of the push notification
+                        data: {
+                          url: window.location.href, // pass the current url to the notification
+                        },
+                        vibrate: [200, 100, 200, 100, 200, 100, 200]
+                      }
+                    );                 
                   }
-                );
+                }
                 setTimeout(() => sendPending(), 43200000)
               }
               setTimeout(() => sendPending(), 20000)

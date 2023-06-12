@@ -64,6 +64,7 @@ export const EntriesProvider: FC<Props> = ({ children }) => {
       const { status, data } = await entriesApi.get("/entries");
       if (status == 200) {
         dispatch({ type: "[Entries] - Refresh-Data", payload: data });
+        return data
       }
     } catch (error) {
       console.log({ error });
