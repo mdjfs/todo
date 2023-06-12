@@ -50,8 +50,7 @@ export const EntryList: FC<Props> = ({ status }) => {
                 const days = Math. floor( timeleft / (1000 * 60 * 60 * 24));
                 const pendings = [
                   'Quedan ' + days + ' días para ir a Itati\n\n',
-                  'Pendientes para el viaje:\n\n',
-                  ...entries.map(entry => entry.description)
+                  'Pendientes para el viaje:\n\n' + entries.map(entry => entry.description).join(', '),
                 ]
                 reg.showNotification(
                   'Pendientes',
