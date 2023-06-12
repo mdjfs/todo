@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "entries/[id]": {
+      "maxDuration": 60
+    },
+    "index": {
+      "maxDuration": 60
+    }
+  }
+}
