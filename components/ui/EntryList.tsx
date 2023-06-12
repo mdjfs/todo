@@ -1,5 +1,4 @@
 import { List, Paper } from "@mui/material";
-import { useRouter } from "next/router";
 import React, { DragEvent, FC, useContext, useEffect, useMemo } from "react";
 import { EntriesContext } from "../../context/entries";
 import { UIContext } from "../../context/ui";
@@ -12,7 +11,7 @@ interface Props {
 }
 
 export const EntryList: FC<Props> = ({ status }) => {
-  const { entries, updateEntry, refreshEntries } = useContext(EntriesContext);
+  const { entries, updateEntry } = useContext(EntriesContext);
   const { isDragging, endDragging } = useContext(UIContext);
   const entriesByStatus = useMemo(
     () =>
@@ -31,53 +30,6 @@ export const EntryList: FC<Props> = ({ status }) => {
     updateEntry(id, { status });
     endDragging();
   };
-
-  useEffect(() => {
-    if(status === 'pending') {
-      (async () => {
-        const reg = await navigator.serviceWorker.getRegistration();
-        if(reg) {
-          Notification.requestPermission().then(permission => {
-            if (permission !== 'granted') {
-              alert('No aceptes las notificaciones para no estar al tanto')
-            } else {
-              console.log(' se envia ')
-              const sendPending = async () => {
-                const newEntries = await refreshEntries()
-                if(newEntries) {
-                  const pendingEntries = newEntries.filter(entry => entry.status === 'pending')
-                  if(pendingEntries.length > 0) {
-                    const now = new Date(). getTime();
-                    const futureDate = new Date('17 Jun 2023 18:00:00'). getTime();
-                    const timeleft = futureDate - now;
-                    const days = Math. floor( timeleft / (1000 * 60 * 60 * 24));
-                    const pendings = [
-                      'Quedan ' + days + ' días para ir a Itati\n',
-                      'Pendientes para el viaje: ' + pendingEntries.map(entry => entry.description).join(', '),
-                    ]
-                    reg.showNotification(
-                      'Pendientes',
-                      {
-                        tag: 'pendiente-' + new Date().toString(), // a unique ID
-                        body: pendings.join('\n'), // content of the push notification
-                        data: {
-                          url: window.location.href, // pass the current url to the notification
-                        },
-                        vibrate: [200, 100, 200, 100, 200, 100, 200]
-                      }
-                    );                 
-                  }
-                }
-                setTimeout(() => sendPending(), 43200000)
-              }
-              setTimeout(() => sendPending(), 20000)
-            }
-          });
-        }
-      })();
-    }
-      
-  }, [])
 
 
   return (
